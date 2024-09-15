@@ -19,7 +19,6 @@ on:
 env: 
   TF_LOG: INFO
   TF_INPUT: false
-  output: "Unknown"
 
 jobs:
   terraform:
@@ -96,7 +95,11 @@ jobs:
             -var="location=${{ github.event.inputs.storage_location }}"
 
           terraform apply -auto-approve -input=false tfport-${GITHUB_RUN_NUMBER}.tfplan
-          output=$(terraform output endpoint_url)
+          
+      - name: Export Terraform output
+        id: tf
+        run: |
+          echo "URL_NAME=$(terraform output -raw endpoint_url)" >> $GITHUB_OUTPUT
 
       - name: Terraform Port Status
         if: steps.plan-port.outcome == 'failure'
@@ -112,7 +115,7 @@ jobs:
           runId: ${{fromJson(inputs.port_context).runId}}
           properties: |
                   {
-                    "url": "$output"
+                    "url": ${{ steps.tf.outputs.URL_NAME }}
                   }
           blueprint: ${{fromJson(inputs.port_context).blueprint}}
           logMessage: Created ${{ inputs.storage_name }}
