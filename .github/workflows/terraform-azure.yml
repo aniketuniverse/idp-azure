@@ -114,4 +114,5 @@ jobs:
                   {
                     "url": "$output"
                   }
+          blueprint: ${{fromJson(inputs.port_context).blueprint}}
           logMessage: Created ${{ inputs.storage_name }}
