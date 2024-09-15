@@ -19,6 +19,7 @@ on:
 env: 
   TF_LOG: INFO
   TF_INPUT: false
+  output: "Unknown"
 
 jobs:
   terraform:
@@ -95,6 +96,7 @@ jobs:
             -var="location=${{ github.event.inputs.storage_location }}"
 
           terraform apply -auto-approve -input=false tfport-${GITHUB_RUN_NUMBER}.tfplan
+          output=$(terraform output endpoint_url)
 
       - name: Terraform Port Status
         if: steps.plan-port.outcome == 'failure'
@@ -108,4 +110,8 @@ jobs:
           baseUrl: https://api.getport.io
           operation: PATCH_RUN
           runId: ${{fromJson(inputs.port_context).runId}}
+          properties: |
+                  {
+                    "url": "$output"
+                  }
           logMessage: Created ${{ inputs.storage_name }}
